@@ -1,7 +1,8 @@
-import pygame
+import pygame, sys
 from enum import Enum, unique
 from math import sqrt
 from random import randint
+from math import pi
 '''
 导入各种库的说明：
 1. pygame库：
@@ -28,7 +29,6 @@ class Color(Enum):                                                       # 定�
 
 
 class Ball(object):                                                      # 定义球，绘制球的大小、球的颜色，移动方法、吃掉其他球的规则
-
     def __init__(self, x, y, radius, sx, sy, color=Color.RED):           #初始化方法   
                                                                          # color初始值为Color类中的RED颜色
         self.x = x                                                       # 球的初始x坐标，鼠标点击时获取
@@ -57,6 +57,7 @@ class Ball(object):                                                      # 定�
             if distance < self.radius + other.radius and self.radius > other.radius:
                 other.alive = False                                      # 其他球的存活（alive）= False，即其他球被吃掉
                 self.radius = self.radius + int(other.radius * 0.146)    # 定义合并后新球的半径
+    
 
     def draw(self, screen):                                              # 在窗口上绘制球，利用pygame库绘制
                                                                          # 屏幕参数、球的颜色、球的初始位置、球的半径
@@ -65,21 +66,33 @@ class Ball(object):                                                      # 定�
 def main():                                                              
     balls = []                                                           # 定义用来装所有球的容器
     pygame.init()                                                        # 初始化导入的pygame中的模块
-    screen = pygame.display.set_mode((1000, 1200))                       # 初始化用于显示的窗口并设置窗口尺寸
+    screen = pygame.display.set_mode((1000, 800))                        # 初始化用于显示的窗口并设置窗口尺寸
     pygame.display.set_caption('大球吃小球游戏——Python期中作业')          # 设置当前窗口的标题
-    running = True                                                       # 开启一个事件循环处理发生的事件
-    while running:                                                       # 从消息队列中获取事件并对事件进行处理
+    pygame.mixer.music.load('D:/python/Welcome to Wonderland.mp3')       # 导入背景音乐
+    pygame.mixer.music.play()                                            # 播放背景音乐
+    running = True
+    #color = Color.random_color()
+    #ball = Ball(10,100,20,3,3,color)                                                          # 开启一个事件循环处理发生的事件
+    while running:   
+                                                         # 从消息队列中获取事件并对事件进行处理
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:# 处理鼠标事件的代码
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 x, y = event.pos                                          # 获得点击鼠标的位置，赋值给初始位置的x,y
-                radius = randint(10, 80)                                  # 半径在[10,80)中随机生成
-                sx, sy = randint(-10, 10), randint(-10, 10)               # 每次上下左右随机移动10
+                print(event.pos)
+                radius = randint(10, 60)                                  # 半径在[10,60)中随机生成
+                sx, sy = randint(-5, 5), randint(-8, 8)                   # 球的速度
                 color = Color.random_color()                              # 获得球的随机颜色
                 ball = Ball(x, y, radius, sx, sy, color)                  # 在点击鼠标的位置创建一个球(大小、速度和颜色随机)
-                balls.append(ball)                                        # 将球添加到列表容器中
-        
+                balls.append(ball)
+                '''
+                for ball in balls:
+                    if sqrt((event.pos[0]-ball.x)**2 + (event.pos[1]-ball.y)**2) <= ball.radius:
+                       balls.append(ball) 
+                    else:
+                       pass                                               # 将球添加到列表容器中
+                '''
         screen.fill((255, 255, 255))
         for ball in balls:                                                # 取出容器中的球，如果没被吃掉就绘制，被吃掉了就移除
             if ball.alive:
