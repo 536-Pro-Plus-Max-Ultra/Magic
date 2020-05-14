@@ -1,12 +1,18 @@
 import pygame, sys
 from enum import Enum, unique
-from math import sqrt
+from math import sqrt, pi
 from random import randint
-from math import pi
+import pygame.font
+import tkinter as tk
+import time
 '''
 导入各种库的说明：
-1. pygame库：
-    
+1. pygame库：实现游戏的主体结构；
+2. enum库：实现随机颜色；
+3. random库：实现随机半径、速度；
+4. math库：计算半径、距离；
+5. tkinter库：实现开局按钮；
+6. time库：实现游戏结束不立刻退出游戏
 '''
 @unique                                                                  # 借助 @unique 装饰器,这样当枚举类中出现相同值的成员时，
                                                                          # 程序会报 ValueError 错误
@@ -27,6 +33,26 @@ class Color(Enum):                                                       # 定�
         b = randint(0, 255)
         return (r, g, b)
 
+class App():                                                             # 定义开局按钮
+    def __init__(self,root):
+        frame = tk.Frame(root)
+        frame.pack()
+        self.start = tk.Button(frame,text = "开始",fg = "black",command = self.start_1)
+        self.start.pack(side = tk.LEFT)
+    def start_1(self):
+        main()
+        while(True):
+            print("如果要退出程序,按Y/N")
+            in_content = input("请输入：")
+            if in_content == "Y":
+                print("执行成功！")
+                exit(0)
+            elif in_content == "N":
+                print("你已退出了该程序！")
+                exit(0)
+            else:
+                print('继续')
+
 
 class Ball(object):                                                      # 定义球，绘制球的大小、球的颜色，移动方法、吃掉其他球的规则
     def __init__(self, x, y, radius, sx, sy, color=Color.RED):           #初始化方法   
@@ -34,8 +60,8 @@ class Ball(object):                                                      # 定�
         self.x = x                                                       # 球的初始x坐标，鼠标点击时获取
         self.y = y                                                       # 球的初始y坐标，鼠标点击时获取
         self.radius = radius                                             # 球的初始半径，随机半径
-        self.sx = sx                                                     # 球在x方向上的位移
-        self.sy = sy                                                     # 球在y方向上的位移
+        self.sx = sx                                                     # 球在x方向上的位移(速度)
+        self.sy = sy                                                     # 球在y方向上的位移(速度)
         self.color = color                                               # 球的初始颜色
         self.alive = True                                                # 球是否“存活”（是否被吃掉了）
 
@@ -63,48 +89,67 @@ class Ball(object):                                                      # 定�
                                                                          # 屏幕参数、球的颜色、球的初始位置、球的半径
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, 0)
 
-def main():                                                              
+def main():
+    score = 0                                                            # 记录分数
+    ballnumber = 0
+    eatballnumber = 0 
     balls = []                                                           # 定义用来装所有球的容器
     pygame.init()                                                        # 初始化导入的pygame中的模块
-    screen = pygame.display.set_mode((1000, 800))                        # 初始化用于显示的窗口并设置窗口尺寸
-    pygame.display.set_caption('大球吃小球游戏——Python期中作业')          # 设置当前窗口的标题
+    screen = pygame.display.set_mode((1200, 600))                        # 初始化用于显示的窗口并设置窗口尺寸
+    pygame.display.set_caption('大球吃小球游戏——Python期中作业')           # 设置当前窗口的标题
+    game_font = pygame.font.SysFont('SimHei', 17, True)                  # 设置字体
     pygame.mixer.music.load('D:/python/Welcome to Wonderland.mp3')       # 导入背景音乐
-    pygame.mixer.music.play()                                            # 播放背景音乐
-    running = True
-    #color = Color.random_color()
-    #ball = Ball(10,100,20,3,3,color)                                                          # 开启一个事件循环处理发生的事件
+    pygame.mixer.music.play(20)                                          # 播放背景音乐
+
+    running = True                                                       # 开启一个事件循环处理发生的事件
     while running:   
-                                                         # 从消息队列中获取事件并对事件进行处理
+                                                                         # 从消息队列中获取事件并对事件进行处理     
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 x, y = event.pos                                          # 获得点击鼠标的位置，赋值给初始位置的x,y
-                print(event.pos)
-                radius = randint(10, 60)                                  # 半径在[10,60)中随机生成
-                sx, sy = randint(-5, 5), randint(-8, 8)                   # 球的速度
+                radius = randint(20, 50)                                  # 半径在[20,50)中随机生成
+                sx, sy = randint(-5, 5), randint(-6, 6)                   # 球的速度，球的速度可能为0
                 color = Color.random_color()                              # 获得球的随机颜色
                 ball = Ball(x, y, radius, sx, sy, color)                  # 在点击鼠标的位置创建一个球(大小、速度和颜色随机)
-                balls.append(ball)
-                '''
-                for ball in balls:
-                    if sqrt((event.pos[0]-ball.x)**2 + (event.pos[1]-ball.y)**2) <= ball.radius:
-                       balls.append(ball) 
-                    else:
-                       pass                                               # 将球添加到列表容器中
-                '''
-        screen.fill((255, 255, 255))
+                if len(balls) >= 6:                                       # 球数超过设定则不能放球
+                    print('球的个数太多了，慢一点放吖！')
+                    pass                                                  # 超过则不允许放球，忽略操作
+                else:
+                    balls.append(ball)                                    # 将球添加到列表容器中
+
+        screen.fill((255, 255, 255))                                      # 背景填充为白色
+
         for ball in balls:                                                # 取出容器中的球，如果没被吃掉就绘制，被吃掉了就移除
+            if ball.radius >= 120:                                        # 如果球的半径大于等于120，则“灭活”该球，使得alive = False
+                ballnumber += 1
+                print('你已经消灭 %d 个球啦！'% ballnumber)                 # 记录由于半径过大被消灭的球
+                ball.alive = False                                        # 防止球面积过大，占满屏幕
             if ball.alive:
                 ball.draw(screen)
             else:
+                eatballnumber += 1
+                print('你已经吃掉 %d 个球啦！'% eatballnumber)              # 记录被吃掉球的个数
                 balls.remove(ball)
-        pygame.display.flip()                                             # 每隔60毫秒就改变球的位置再刷新窗口
-        pygame.time.delay(60)
+                score += ball.radius*10                                   # 在屏幕上显示得分、“战况”、游戏说明
+        screen.blit(game_font.render(u'吃掉了 {0} 个球 , 消灭了 {1} 个球！'.format(eatballnumber, ballnumber), True, [255, 0, 0]), [900,20])
+        screen.blit(game_font.render(u'当前得分：%d 达到15000就赢了！' % score, True, [255, 0, 0]), [20, 20])
+        screen.blit(game_font.render(u'鼠标点击任意位置放球，球合并即得分' , True, [89, 0, 0]), [890, 580])
+        pygame.display.flip()                                             # 每隔30毫秒就改变球的位置再刷新窗口
+        pygame.time.delay(30)
         for ball in balls:
             ball.move(screen)
             for other in balls:                                           # 检查球有没有吃到其他的球
                 ball.eat(other)
+        if score>=15000:
+            print('*'*75)
+            print('你胜利了!\n','*'*75,'\n游戏将在3秒后退出，点击开始按钮可以继续！')
+            time.sleep(3)                                                 # 暂停3S后退出游戏
+            pygame.quit()
+            sys.exit()
 
 if __name__ == '__main__':
-    main()
+    root = tk.Tk()
+    app = App(root)
+    root.mainloop()
