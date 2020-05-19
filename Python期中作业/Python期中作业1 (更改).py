@@ -54,7 +54,7 @@ class App():                                                             # 定�
                 print('继续')
 
 
-class Ball(object):                                                      # 定义球，绘制球的大小、球的颜色，移动方法、吃掉其他球的规则
+class Ball(object):                                                     # 定义球，绘制球的大小、球的颜色，移动方法、吃掉其他球的规则
     def __init__(self, x, y, radius, sx, sy, color=Color.RED):           #初始化方法   
                                                                          # color初始值为Color类中的RED颜色
         self.x = x                                                       # 球的初始x坐标，鼠标点击时获取
@@ -89,16 +89,34 @@ class Ball(object):                                                      # 定�
                                                                          # 屏幕参数、球的颜色、球的初始位置、球的半径
         pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, 0)
 
+def gameOver(playSurface,score):                                         # 显示GAME OVER并定义字体以及大小
+    greyColour = pygame.Color(150, 150, 150)
+    gameOverFont = pygame.font.SysFont('arial', 72)
+    gameOverSurf = gameOverFont.render('Game Over', True, greyColour)
+    gameOverRect = gameOverSurf.get_rect()
+    gameOverRect.midtop = (320, 125)
+    playSurface.blit(gameOverSurf, gameOverRect)                        # 显示分数并定义字体和大小
+    scoreFont = pygame.font.SysFont('arial', 72)
+    scoreSurf = scoreFont.render('SCORE: ' + str(score), True, greyColour)
+    scoreRect = scoreSurf.get_rect()
+    scoreRect.midtop = (320, 225)
+    playSurface.blit(scoreSurf, scoreRect)
+    pygame.display.flip()                                               # 刷新显示界面
+    time.sleep(3)                                                       # 暂停3S后退出游戏
+    pygame.quit()
+    sys.exit()
+
 def main():
+    playSurface = pygame.display.set_mode((640, 480))
     score = 0                                                            # 记录分数
     ballnumber = 0
     eatballnumber = 0 
     balls = []                                                           # 定义用来装所有球的容器
     pygame.init()                                                        # 初始化导入的pygame中的模块
     screen = pygame.display.set_mode((1200, 600))                        # 初始化用于显示的窗口并设置窗口尺寸
-    pygame.display.set_caption('大球吃小球游戏——Python期中作业')           # 设置当前窗口的标题
+    pygame.display.set_caption('大球吃小球游戏——Python期中作业')       # 设置当前窗口的标题
     game_font = pygame.font.SysFont('SimHei', 17, True)                  # 设置字体
-    pygame.mixer.music.load('D:/python/Welcome to Wonderland.mp3')       # 导入背景音乐
+    pygame.mixer.music.load('D:\Python\Welcome to Wonderland.mp3')       # 导入背景音乐
     pygame.mixer.music.play(20)                                          # 播放背景音乐
 
     running = True                                                       # 开启一个事件循环处理发生的事件
@@ -111,8 +129,12 @@ def main():
                 x, y = event.pos                                          # 获得点击鼠标的位置，赋值给初始位置的x,y
                 radius = randint(20, 50)                                  # 半径在[20,50)中随机生成
                 sx, sy = randint(-5, 5), randint(-6, 6)                   # 球的速度，球的速度可能为0
-                if sx == sy :
-                    sx, sy = randint(-5, 5), randint(-6, 6)
+                def isZero(sx,sy):
+                    if sx == 0 and sy == 0 :
+                        sx, sy = randint(-5, 5), randint(-6, 6)
+                        return isZero(sx,sy)
+                    else:
+                        pass
                 color = Color.random_color()                              # 获得球的随机颜色
                 ball = Ball(x, y, radius, sx, sy, color)                  # 在点击鼠标的位置创建一个球(大小、速度和颜色随机)
                 if len(balls) >= 6:                                       # 球数超过设定则不能放球
@@ -147,9 +169,8 @@ def main():
         if score>=15000:
             print('*'*75)
             print('你胜利了!\n','*'*75,'\n游戏将在3秒后退出，点击开始按钮可以继续！')
-            time.sleep(3)                                                 # 暂停3S后退出游戏
-            pygame.quit()
-            sys.exit()
+            gameOver(playSurface,score)
+
 
 if __name__ == '__main__':
     root = tk.Tk()
