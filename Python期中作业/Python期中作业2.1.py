@@ -65,7 +65,7 @@ class Ball(object):                                                      # 定�
 
     def draw(self, screen):                                              # 在窗口上绘制球，利用pygame库绘制
                                                                          # 屏幕参数、球的颜色、球的初始位置、球的半径
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius, 0)
+        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
 
 def gameOver(playSurface,score):                                         # 显示GAME OVER并定义字体以及大小
     greyColour = pygame.Color(150, 150, 150)
@@ -91,7 +91,7 @@ def main():
     eatballnumber = 0 
     balls = []                                                           # 定义用来装所有球的容器
     pygame.init()                                                        # 初始化导入的pygame中的模块
-    screen = pygame.display.set_mode((1200, 600))                        # 初始化用于显示的窗口并设置窗口尺寸
+    screen = pygame.display.set_mode((1200,800))                         # 初始化用于显示的窗口并设置窗口尺寸
     pygame.display.set_caption('大球吃小球游戏——Python期中作业')       # 设置当前窗口的标题
     game_font = pygame.font.SysFont('SimHei', 17, True)                  # 设置字体
     pygame.mixer.music.load('Welcome to Wonderland.mp3')                 # 导入背景音乐
@@ -146,7 +146,7 @@ def main():
             start_ck.blit(i3, (200, 480))
 
 
-        playSurface.blit(start_ck,(0,0))                                #刷新                               
+        playSurface.blit(start_ck,(0,0))                                # 刷新                               
         pygame.display.update()
 
         for event in pygame.event.get():                                # 事件检测
@@ -199,7 +199,7 @@ def main():
                 score += ball.radius*10                                   # 在屏幕上显示得分、“战况”、游戏说明
         screen.blit(game_font.render(u'吃掉了 {0} 个球 , 消灭了 {1} 个球！'.format(eatballnumber, ballnumber), True, [255, 0, 0]), [900,20])
         screen.blit(game_font.render(u'当前得分：%d 达到15000就赢了！' % score, True, [255, 0, 0]), [20, 20])
-        screen.blit(game_font.render(u'鼠标点击任意位置放球，球合并即得分' , True, [89, 0, 0]), [890, 580])
+        screen.blit(game_font.render(u'鼠标点击任意位置放球，球合并即得分' , True, [89, 0, 0]), [870, 780])
         pygame.display.flip()                                             # 每隔30毫秒就改变球的位置再刷新窗口
         pygame.time.delay(30)
         for ball in balls:
